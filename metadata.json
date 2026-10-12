@@ -1,0 +1,6 @@
+{
+  "name": "फॉर्म 777 - महासेवा पोर्टल (Form 777)",
+  "description": "नागरिक सहाय्यता व मार्गदर्शक पोर्टल - कागदपत्रे तपासा, ७७७ अधिकृत सरकारी फॉर्म्स शोधा आणि अधिकृत .gov.in पोर्टलवर थेट अर्ज करा.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
