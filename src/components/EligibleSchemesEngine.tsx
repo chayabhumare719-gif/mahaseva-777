@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Language, Scheme, SchemeCategory } from '../types';
 import { SCHEMES, SCHEME_CATEGORIES } from '../data/schemesData';
 import { DOCUMENTS } from '../data/documentsData';
+import { getVerifiedGovernmentHref, isVerifiedGovernmentUrl, sanitizeSearchQuery } from '../utils/security';
+import { getDocDisplayName, pickLang, tr, UI } from '../utils/i18n';
 import {
   CheckCircle2,
   AlertCircle,
@@ -176,7 +178,7 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQuery(sanitizeSearchQuery(e.target.value))}
               placeholder={lang === 'mr' ? 'योजना शोधा (उदा. लाडकी बहीण, पीएम किसान...)' : 'Search scheme name or benefit...'}
               className="w-full pl-9 pr-3 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white text-slate-900"
             />
@@ -199,7 +201,7 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {cat.title[lang]}
+              {pickLang(cat.title, lang)}
             </button>
           ))}
         </div>
@@ -265,10 +267,10 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                       </div>
 
                       <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                        {scheme.name[lang]}
+                        {pickLang(scheme.name, lang)}
                       </h3>
                       <div className="text-xs text-slate-500 font-medium mt-0.5">
-                        {scheme.department[lang]}
+                        {pickLang(scheme.department, lang)}
                       </div>
                     </div>
                   </div>
@@ -278,23 +280,23 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                     <BadgeIndianRupee className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
                     <div>
                       <div className="text-[11px] font-bold text-orange-800 uppercase tracking-wide">
-                        {lang === 'mr' ? 'शासकीय थेट लाभ:' : 'Government Benefit:'}
+                        {tr(UI.benefitPurpose, lang)}
                       </div>
                       <div className="text-sm font-extrabold text-orange-950">
-                        {scheme.benefit[lang]}
+                        {pickLang(scheme.benefit, lang)}
                       </div>
                     </div>
                   </div>
 
                   {/* Brief Description */}
                   <p className="text-xs text-slate-600 mt-3 leading-relaxed">
-                    {scheme.brief[lang]}
+                    {pickLang(scheme.brief, lang)}
                   </p>
 
                   {/* Required Documents Status */}
                   <div className="mt-4 pt-3 border-t border-slate-100">
                     <div className="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
-                      <span>{lang === 'mr' ? 'आवश्यक कागदपत्रे पडताळणी:' : 'Required Documents Verification:'}</span>
+                      <span>{tr(UI.docsLabel, lang)}</span>
                       <span className="text-[11px] text-slate-500 font-semibold">
                         {scheme.possessedDocIds.length} / {scheme.requiredDocIds.length}
                       </span>
@@ -304,7 +306,7 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                       {scheme.requiredDocIds.map((docId) => {
                         const isPossessed = selectedDocIds.includes(docId);
                         const docObj = docMap.get(docId);
-                        const docName = docObj ? docObj.name[lang] : docId;
+                        const docName = docObj ? getDocDisplayName(docObj, lang) : docId;
 
                         return (
                           <span
@@ -331,14 +333,14 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                       <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
                         <div className="font-bold flex items-center gap-1 text-amber-950">
                           <MapPin className="w-3.5 h-3.5 text-amber-700" />
-                          <span>{lang === 'mr' ? 'बाकी कागदपत्रे कुठून मिळवाल?' : 'Where to obtain missing docs:'}</span>
+                          <span>{tr(UI.missingOneTwoPrefix, lang)}</span>
                         </div>
                         {scheme.missingDocIds.map((mId) => {
                           const mDoc = docMap.get(mId);
                           if (!mDoc) return null;
                           return (
                             <div key={mId} className="text-[11px] text-amber-800 pl-4">
-                              • <strong>{mDoc.name[lang]}:</strong> {mDoc.whereToGet[lang]}
+                              • <strong>{getDocDisplayName(mDoc, lang)}:</strong> {pickLang(mDoc.whereToGet, lang)}
                             </div>
                           );
                         })}
@@ -355,21 +357,24 @@ export const EligibleSchemesEngine: React.FC<EligibleSchemesEngineProps> = ({
                     className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
                   >
                     <BookOpen className="w-3.5 h-3.5 text-slate-600" />
-                    <span>{lang === 'mr' ? 'कसा अर्ज करावा? (मार्गदर्शन)' : 'How to Apply?'}</span>
+                    <span>{tr(UI.detailsBtn, lang)}</span>
                   </button>
 
                   <a
-                    href={scheme.officialUrl}
+                    href={getVerifiedGovernmentHref(scheme.officialUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={lang === 'mr' ? 'क्रोम ब्राऊझरच्या नवीन टॅबमध्ये थेट अधिकृत सरकारी वेबसाईट उघडेल' : 'Opens directly in Chrome new browser tab'}
+                    onClick={(e) => {
+                      if (!isVerifiedGovernmentUrl(scheme.officialUrl)) e.preventDefault();
+                    }}
+                    title={tr(UI.openFormInChrome, lang)}
                     className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold rounded-lg shadow-xs transition-all cursor-pointer ${
                       scheme.is100Percent
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         : 'bg-slate-900 hover:bg-slate-800 text-white'
                     }`}
                   >
-                    <span>{lang === 'mr' ? 'क्रोममध्ये थेट फॉर्म भरा' : 'Open in Chrome'}</span>
+                    <span>{tr(UI.openFormInChrome, lang)}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>

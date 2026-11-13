@@ -1,4 +1,5 @@
 import { DocumentCategory, DocumentItem } from '../types';
+import { deeplyFreeze } from '../utils/security';
 
 export const DOCUMENT_CATEGORIES: { id: DocumentCategory; title: { mr: string; en: string }; iconName: string }[] = [
   {
@@ -516,3 +517,6 @@ export const DOCUMENT_PACKS: DocumentPack[] = [
     }
   }
 ];
+
+deeplyFreeze(DOCUMENTS);
+deeplyFreeze(DOCUMENT_PACKS);

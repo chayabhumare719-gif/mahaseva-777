@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Language, GovFormItem777, Gender, CitizenProfile } from '../types';
 import { FORMS_777_DATA, FORMS_777_CATEGORIES } from '../data/forms777Data';
 import { DOCUMENTS } from '../data/documentsData';
-import { isVerifiedGovernmentUrl } from '../utils/security';
+import { getVerifiedGovernmentHref, isVerifiedGovernmentUrl, sanitizeSearchQuery } from '../utils/security';
 import { evaluateFormEligibility } from '../utils/eligibility';
+import { getDocDisplayName, getFormCatLabel, getLocalizedFormName, pickLang, tr, UI } from '../utils/i18n';
 import { FormLauncherModal } from './FormLauncherModal';
 import {
   Search,
@@ -206,13 +207,11 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                 ७७७ फॉर्म्स
               </span>
               <h2 className="text-base sm:text-xl font-black text-slate-900 tracking-tight">
-                {lang === 'mr' ? 'भारतातील ७७७ मोबाईल सरकारी फॉर्म्स (Form #001 ते #777)' : 'All 777 Verified Mobile Forms (Form #001 to #777)'}
+                {tr(UI.heroHeading, lang)}
               </h2>
             </div>
             <p className="text-xs text-slate-600 mt-1">
-              {lang === 'mr'
-                ? 'कोणतीही माहिती भरण्याची सक्ती नाही — सर्व ७७७ फॉर्म्स खाली थेट उपलब्ध आहेत. प्रत्येक फॉर्म अधिकृत .gov.in वर क्रोममध्ये उघडतो.'
-                : 'No registration or personal data required. Browse all 777 forms directly or filter by eligibility.'}
+              {tr(UI.heroSubheading, lang)}
             </p>
           </div>
 
@@ -223,7 +222,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{lang === 'mr' ? '१००% शासकीय दुवे' : '100% Gov Links'}</span>
+              <span>{tr(UI.verifiedGovLinks, lang)}</span>
             </button>
           </div>
         </div>
@@ -246,14 +245,14 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
             <div className="space-y-0.5">
               <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
                 <Smartphone className="w-4 h-4 text-orange-600" />
-                <span>{lang === 'mr' ? '१. स्वतंत्रपणे सर्व ७७७ फॉर्म्स पहा' : '1. Browse All 777 Forms Freely'}</span>
+                <span>{tr(UI.browseAll777Title, lang)}</span>
               </div>
               <p className="text-[11px] text-slate-500">
-                {lang === 'mr' ? 'कोणतीही माहिती न भरता थेट #001 ते #777 पहा' : 'No personal info needed, view all 777'}
+                {tr(UI.browseAll777Sub, lang)}
               </p>
             </div>
-            <span className="text-xs font-black bg-orange-600 text-white px-2 py-1 rounded font-mono">
-              777 फॉर्म्स
+            <span className="text-xs font-black bg-orange-600 text-white px-2 py-1 rounded font-mono shrink-0">
+              {tr(UI.brandBadge, lang)}
             </span>
           </button>
 
@@ -272,14 +271,14 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
             <div className="space-y-0.5">
               <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>{lang === 'mr' ? '२. माझ्या पात्रतेनुसार फॉर्म्स तपासा' : '2. Filter By My Eligibility'}</span>
+                <span>{tr(UI.filterByEligTitle, lang)}</span>
               </div>
               <p className="text-[11px] text-slate-500">
-                {lang === 'mr' ? 'वय, लिंग व निवडलेल्या कागदपत्रांनुसार' : 'Filter by selected documents & age'}
+                {tr(UI.filterByEligSub, lang)}
               </p>
             </div>
-            <span className="text-xs font-bold bg-emerald-600 text-white px-2 py-1 rounded">
-              {eligibilityCounts.eligible} पात्र
+            <span className="text-xs font-bold bg-emerald-600 text-white px-2 py-1 rounded shrink-0">
+              {eligibilityCounts.eligible} {tr(UI.eligibleShort, lang)}
             </span>
           </button>
         </div>
@@ -295,14 +294,10 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                setSearchQuery(sanitizeSearchQuery(e.target.value));
                 setCurrentPage(1);
               }}
-              placeholder={
-                lang === 'mr'
-                  ? 'फॉर्म नंबर किंवा नाव शोधा (उदा. 777, 12, लाडकी बहीण, पीएम किसान, रेशन, सातबारा...)'
-                  : 'Search by Form # (e.g. 777, 10) or keyword (e.g. kisan, ration, 7/12, pan...)'
-              }
+              placeholder={tr(UI.formsSearchPlaceholder, lang)}
               className="w-full pl-11 pr-24 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white text-slate-900"
             />
             {searchQuery && (
@@ -314,14 +309,14 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                 }}
                 className="absolute right-3 top-2 text-xs text-slate-500 hover:text-slate-800 bg-slate-200 px-2 py-0.5 rounded cursor-pointer"
               >
-                Clear
+                {tr(UI.clearBtn, lang)}
               </button>
             )}
           </div>
 
           {/* Quick Jump Buttons & Form Number Direct Entry */}
           <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-0.5 text-xs shrink-0">
-            <span className="text-slate-500 font-bold shrink-0">{lang === 'mr' ? 'थेट जा:' : 'Jump:'}</span>
+            <span className="text-slate-500 font-bold shrink-0">{tr(UI.jumpLabel, lang)}</span>
             {[1, 50, 100, 250, 500, 777].map((num) => (
               <button
                 key={num}
@@ -355,7 +350,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                 type="submit"
                 className="px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded text-xs cursor-pointer shadow-2xs"
               >
-                {lang === 'mr' ? 'जा' : 'Go'}
+                {tr(UI.goBtn, lang)}
               </button>
             </form>
           </div>
@@ -472,7 +467,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
         <div className="pt-1 flex items-center gap-1.5 overflow-x-auto pb-1">
           <span className="text-xs font-bold text-slate-500 shrink-0 mr-1 flex items-center gap-1">
             <Filter className="w-3.5 h-3.5" />
-            {lang === 'mr' ? 'विभाग:' : 'Category:'}
+            {tr(UI.categoryLabel, lang)}
           </span>
           {FORMS_777_CATEGORIES.map((cat) => (
             <button
@@ -488,7 +483,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              {cat.label[lang]}
+              {getFormCatLabel(cat.key, cat.label, lang)}
             </button>
           ))}
         </div>
@@ -499,9 +494,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
             <div className="font-bold text-slate-800 flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>
-                {lang === 'mr'
-                  ? `१ ते ७७७ लगातार: एकूण ${filteredForms.length} फॉर्म्स (दाखवले: ${paginatedForms.length})`
-                  : `1 to 777 Continuous: ${filteredForms.length} forms (Showing ${paginatedForms.length})`}
+                {filteredForms.length} / 777 ({paginatedForms.length})
               </span>
             </div>
           </div>
@@ -520,10 +513,10 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                     ? 'bg-orange-600 text-white shadow-xs'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
-                title="१ ते ७७७ लगातार एका लाईनीत सलग यादी"
+                title={tr(UI.lineViewLabel, lang)}
               >
                 <List className="w-3.5 h-3.5" />
-                <span>{lang === 'mr' ? '⚡ एका लाईनीत सलग (१ ते ७७७)' : '⚡ Line View (1-777)'}</span>
+                <span>{tr(UI.lineViewLabel, lang)}</span>
               </button>
               <button
                 type="button"
@@ -533,16 +526,15 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                     ? 'bg-orange-600 text-white shadow-xs'
                     : 'text-slate-700 hover:text-slate-900'
                 }`}
-                title="कार्ड व्ह्यू"
+                title={tr(UI.gridViewLabel, lang)}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                <span>{lang === 'mr' ? '🎴 कार्ड व्ह्यू' : 'Grid'}</span>
+                <span>{tr(UI.gridViewLabel, lang)}</span>
               </button>
             </div>
 
             {/* Per page buttons */}
             <div className="hidden sm:flex items-center gap-1">
-              <span className="text-slate-400 font-medium">{lang === 'mr' ? 'दाखवा:' : 'Show:'}</span>
               {[24, 50, 100].map((size) => (
                 <button
                   key={size}
@@ -572,24 +564,24 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                     : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
                 }`}
               >
-                {lang === 'mr' ? 'सर्व ७७७' : 'All 777'}
+                777
               </button>
             </div>
           </div>
         </div>
 
-        {/* Range Jump Shortcut Strip (१ ते ७७७ मधील कोणत्याही भागात एका क्लिकवर जा) */}
+        {/* Range Jump Shortcut Strip */}
         <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px]">
-          <span className="text-slate-500 font-bold shrink-0">{lang === 'mr' ? 'क्रमानुसार जा:' : 'Jump Range:'}</span>
+          <span className="text-slate-500 font-bold shrink-0">{tr(UI.jumpLabel, lang)}</span>
           {[
-            { label: '१ - १००', num: 1 },
-            { label: '१०१ - २००', num: 101 },
-            { label: '२०१ - ३००', num: 201 },
-            { label: '३०१ - ४००', num: 301 },
-            { label: '४०१ - ५००', num: 401 },
-            { label: '५०१ - ६००', num: 501 },
-            { label: '६०१ - ७००', num: 601 },
-            { label: '७०१ - ७७७', num: 701 },
+            { label: '1 - 100', num: 1 },
+            { label: '101 - 200', num: 101 },
+            { label: '201 - 300', num: 201 },
+            { label: '301 - 400', num: 301 },
+            { label: '401 - 500', num: 401 },
+            { label: '501 - 600', num: 501 },
+            { label: '601 - 700', num: 601 },
+            { label: '701 - 777', num: 701 },
           ].map((range) => (
             <button
               key={range.num}
@@ -608,13 +600,8 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
         <div className="bg-white rounded-xl p-8 border border-slate-200 text-center space-y-3">
           <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto" />
           <h3 className="text-base font-bold text-slate-800">
-            {lang === 'mr' ? 'या शोधात कोणताही फॉर्म आढळला नाही' : 'No government form matched your search'}
+            {tr(UI.noFormFound, lang)}
           </h3>
-          <p className="text-xs text-slate-500">
-            {lang === 'mr'
-              ? 'कृपया फॉर्म नंबर तपासा किंवा वेगळा मराठी/इंग्रजी शब्द शोधा.'
-              : 'Please check the form number or try a different keyword.'}
-          </p>
           <button
             type="button"
             onClick={() => {
@@ -623,7 +610,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
             }}
             className="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg cursor-pointer"
           >
-            {lang === 'mr' ? 'सर्व ७७७ फॉर्म्स दाखवा' : 'Show All 777 Forms'}
+            {tr(UI.showAllFormsReset, lang)}
           </button>
         </div>
       ) : layoutMode === 'line' ? (
@@ -660,39 +647,39 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                         </span>
                         <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
                           <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                          <span>{lang === 'mr' ? 'अधिकृत .gov.in' : 'Verified .gov.in'}</span>
+                          <span>{tr(UI.verifiedGovBadge, lang)}</span>
                         </span>
                         <span className="text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
-                          {item.categoryLabel[lang]}
+                          {getFormCatLabel(item.categoryKey, item.categoryLabel, lang)}
                         </span>
                         {evalResult.isEligible && (
                           <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
-                            <span>{lang === 'mr' ? '१००% थेट पात्र' : 'Eligible'}</span>
+                            <span>{tr(UI.eligible100Badge, lang)}</span>
                           </span>
                         )}
                         {evalResult.isAlmostEligible && (
                           <span className="text-[11px] font-medium text-amber-800 bg-amber-100 px-2 py-0.5 rounded flex items-center gap-1">
                             <AlertTriangle className="w-3 h-3 text-amber-600" />
-                            <span>{lang === 'mr' ? `फक्त ${evalResult.missingDocIds.length} कागदपत्र बाकी` : 'Almost Eligible'}</span>
+                            <span>{tr(UI.missingOneTwoPrefix, lang)} {evalResult.missingDocIds.length}</span>
                           </span>
                         )}
                       </div>
 
                       <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                        {item.name[lang]}
+                        {getLocalizedFormName(item.name, lang)}
                       </h3>
 
                       <div className="text-xs text-slate-500 font-medium flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
-                        <span className="text-slate-600">🏢 {item.department[lang]}</span>
+                        <span className="text-slate-600">🏢 {pickLang(item.department, lang)}</span>
                         <span className="hidden sm:inline text-slate-300">•</span>
-                        <span className="text-slate-700">🎯 {item.benefitOrPurpose[lang]}</span>
+                        <span className="text-slate-700">🎯 {pickLang(item.benefitOrPurpose, lang)}</span>
                       </div>
 
                       {/* Mobile application instructions */}
                       <div className="text-[11px] text-emerald-900 flex items-center gap-1 pt-0.5">
                         <Smartphone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="font-medium">{item.mobileMethod[lang]}</span>
+                        <span className="font-medium">{pickLang(item.mobileMethod, lang)}</span>
                       </div>
                     </div>
                   </div>
@@ -701,30 +688,33 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                   <div className="flex items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 justify-end">
                     <div className="hidden sm:block text-right pr-2">
                       <div className="text-[10px] text-slate-400 font-medium">
-                        {lang === 'mr' ? 'शासकीय शुल्क' : 'Gov Fee'}
+                        {tr(UI.officialFee, lang)}
                       </div>
-                      <div className="text-xs font-bold text-slate-800">{item.fees[lang]}</div>
+                      <div className="text-xs font-bold text-slate-800">{pickLang(item.fees, lang)}</div>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => setSelectedLauncherForm(item)}
                       className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition-colors cursor-pointer"
-                      title={lang === 'mr' ? 'कागदपत्रे व माहिती पहा' : 'View Details'}
+                      title={tr(UI.detailsBtn, lang)}
                     >
                       <Eye className="w-3.5 h-3.5 text-slate-600" />
-                      <span>{lang === 'mr' ? 'तपशील' : 'Details'}</span>
+                      <span>{tr(UI.detailsBtn, lang)}</span>
                     </button>
 
                     <a
-                      href={item.officialUrl}
+                      href={getVerifiedGovernmentHref(item.officialUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!isGovValid) e.preventDefault();
+                      }}
                       className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors cursor-pointer shadow-xs whitespace-nowrap"
-                      title={lang === 'mr' ? 'क्रोम ब्राऊझरमध्ये अधिकृत फॉर्म उघडा' : 'Open in Chrome'}
+                      title={tr(UI.openInChrome, lang)}
                     >
                       <Smartphone className="w-3.5 h-3.5 text-emerald-200" />
-                      <span>{lang === 'mr' ? 'क्रोममध्ये उघडा' : 'Open in Chrome'}</span>
+                      <span>{tr(UI.openInChrome, lang)}</span>
                       <ExternalLink className="w-3 h-3 text-white/80" />
                     </a>
                   </div>
@@ -761,18 +751,18 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
 
                     <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      {lang === 'mr' ? 'अधिकृत .gov.in' : 'Verified .gov.in'}
+                      {tr(UI.verifiedGovBadge, lang)}
                     </span>
                   </div>
 
                   {/* Form Title */}
                   <h3 className="text-base font-bold text-slate-900 leading-snug">
-                    {item.name[lang]}
+                    {getLocalizedFormName(item.name, lang)}
                   </h3>
 
                   {/* Department */}
                   <div className="text-xs text-slate-500 font-medium mt-1">
-                    {item.department[lang]}
+                    {pickLang(item.department, lang)}
                   </div>
 
                   {/* Live Dynamic Eligibility Status Banner */}
@@ -780,48 +770,55 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                     <div className="mt-2.5 p-2 rounded-lg bg-emerald-50 border border-emerald-300 text-xs text-emerald-950 font-bold flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>{lang === 'mr' ? '✅ १००% थेट पात्र' : '100% Eligible for You'}</span>
+                        <span>{tr(UI.eligible100Badge, lang)}</span>
                       </span>
                       <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded font-mono">
-                        {lang === 'mr' ? 'मोबाईलवर भरा' : 'Ready'}
+                        {tr(UI.readyMobile, lang)}
                       </span>
                     </div>
                   ) : evalResult.isAlmostEligible ? (
                     <div className="mt-2.5 p-2 rounded-lg bg-amber-50 border border-amber-300 text-xs text-amber-950 flex flex-col gap-1">
                       <span className="flex items-center gap-1.5 font-bold">
                         <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                        <span>{lang === 'mr' ? `⚠️ फक्त ${evalResult.missingDocIds.length} कागदपत्र बाकी:` : `Only ${evalResult.missingDocIds.length} doc missing:`}</span>
+                        <span>⚠️ {tr(UI.missingOneTwoPrefix, lang)} ({evalResult.missingDocIds.length})</span>
                       </span>
                       <div className="text-[11px] text-amber-900 font-medium pl-5.5">
-                        {evalResult.missingDocIds.map((d) => docMap.get(d)?.name[lang] || d).join(', ')}
+                        {evalResult.missingDocIds
+                          .map((d) => {
+                            const docObj = docMap.get(d);
+                            return docObj ? getDocDisplayName(docObj, lang) : d;
+                          })
+                          .join(', ')}
                       </div>
                     </div>
                   ) : (
                     <div className="mt-2.5 p-1.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] text-slate-600 flex items-center gap-1.5">
                       <span className="text-slate-400">❌</span>
-                      <span className="truncate">{evalResult.reason?.[lang] || (lang === 'mr' ? 'सध्या अपात्र' : 'Ineligible')}</span>
+                      <span className="truncate">
+                        {pickLang(evalResult.reason, lang) || tr(UI.currentlyIneligible, lang)}
+                      </span>
                     </div>
                   )}
 
                   {/* Benefit / Purpose */}
                   <div className="mt-3 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 text-xs text-slate-700">
-                    <strong className="text-slate-900">{lang === 'mr' ? 'उद्देश / लाभ:' : 'Benefit/Purpose:'}</strong>{' '}
-                    {item.benefitOrPurpose[lang]}
+                    <strong className="text-slate-900">{tr(UI.benefitPurpose, lang)}</strong>{' '}
+                    {pickLang(item.benefitOrPurpose, lang)}
                   </div>
 
                   {/* Mobile Application Method */}
                   <div className="mt-2.5 p-2 rounded-lg bg-emerald-50/70 border border-emerald-200/70 flex items-start gap-2 text-xs text-emerald-950">
                     <Smartphone className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold">{lang === 'mr' ? 'मोबाईलवरून कसा भरावा:' : 'Mobile method:'}</span>{' '}
-                      {item.mobileMethod[lang]}
+                      <span className="font-bold">{tr(UI.mobileMethod, lang)}</span>{' '}
+                      {pickLang(item.mobileMethod, lang)}
                     </div>
                   </div>
 
                   {/* Required Documents Checklist on card */}
                   <div className="mt-2.5 pt-2 border-t border-slate-100">
                     <div className="text-[11px] text-slate-500 font-bold mb-1 flex items-center justify-between">
-                      <span>{lang === 'mr' ? 'कागदपत्रे:' : 'Docs:'}</span>
+                      <span>{tr(UI.docsLabel, lang)}</span>
                       <span className="font-mono text-[10px]">
                         {evalResult.possessedDocIds.length} / {item.requiredDocs.length}
                       </span>
@@ -830,7 +827,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                       {item.requiredDocs.map((docId) => {
                         const hasDoc = selectedDocIds.includes(docId);
                         const dObj = docMap.get(docId);
-                        const dName = dObj ? dObj.name[lang] : docId;
+                        const dName = dObj ? getDocDisplayName(dObj, lang) : docId;
 
                         return (
                           <span
@@ -852,8 +849,8 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                   {/* Official Fee & Portal */}
                   <div className="mt-3 flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
                     <div>
-                      <span className="font-semibold">{lang === 'mr' ? 'शासकीय शुल्क:' : 'Official fee:'}</span>{' '}
-                      <span className="font-bold text-slate-800">{item.fees[lang]}</span>
+                      <span className="font-semibold">{tr(UI.officialFee, lang)}</span>{' '}
+                      <span className="font-bold text-slate-800">{pickLang(item.fees, lang)}</span>
                     </div>
                     <div className="font-mono text-[11px] text-slate-400">
                       {item.securityHash}
@@ -868,21 +865,24 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                       type="button"
                       onClick={() => setSelectedLauncherForm(item)}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg transition-colors cursor-pointer"
-                      title={lang === 'mr' ? 'तपशील, कागदपत्रे व क्रोम सुरक्षा प्रिव्ह्यू पहा' : 'View safety details & Chrome launcher'}
+                      title={tr(UI.detailsPreviewBtn, lang)}
                     >
                       <Eye className="w-3.5 h-3.5 text-slate-600" />
-                      <span>{lang === 'mr' ? 'तपशील व प्रिव्ह्यू' : 'Details & Preview'}</span>
+                      <span>{tr(UI.detailsPreviewBtn, lang)}</span>
                     </button>
 
                     <a
-                      href={item.officialUrl}
+                      href={getVerifiedGovernmentHref(item.officialUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!isGovValid) e.preventDefault();
+                      }}
                       className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors cursor-pointer shadow-xs"
-                      title={lang === 'mr' ? 'क्रोम ब्राऊझरच्या नवीन सुरक्षित टॅबमध्ये थेट उघडेल' : 'Opens directly in Chrome new secure tab'}
+                      title={tr(UI.openInChrome, lang)}
                     >
                       <Smartphone className="w-3.5 h-3.5 text-emerald-200" />
-                      <span>{lang === 'mr' ? 'क्रोममध्ये उघडा' : 'Open in Chrome'}</span>
+                      <span>{tr(UI.openInChrome, lang)}</span>
                       <ExternalLink className="w-3 h-3 text-white/80" />
                     </a>
                   </div>
@@ -890,9 +890,9 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                   <div className="flex items-center justify-between text-[10px] text-slate-500 px-1">
                     <span className="flex items-center gap-1 text-emerald-700 font-medium">
                       <ShieldCheck className="w-3 h-3" />
-                      <span>{lang === 'mr' ? '१००% अधिकृत .gov.in' : '100% Verified .gov.in'}</span>
+                      <span>{tr(UI.verifiedGovBadge, lang)}</span>
                     </span>
-                    <span>{lang === 'mr' ? 'क्रोम टॅबमध्ये उघडेल ↗' : 'Opens in Chrome tab ↗'}</span>
+                    <span>{tr(UI.opensNewTabHint, lang)}</span>
                   </div>
                 </div>
               </div>
@@ -914,17 +914,15 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
               className="w-full sm:w-auto px-5 py-2.5 bg-orange-50 hover:bg-orange-100 text-orange-900 border border-orange-300 font-bold rounded-xl text-xs sm:text-sm transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-orange-600" />
-              <span>{lang === 'mr' ? 'सर्व ७७७ फॉर्म्स एकाच पानावर स्क्रोल करून पहा (Show All 777)' : 'Show All 777 Forms on a Single Page'}</span>
+              <span>{tr(UI.showAll777Btn, lang)}</span>
             </button>
           </div>
         )}
 
         {totalPages > 1 && (
           <div className="bg-white rounded-xl p-4 border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-            <div className="text-xs text-slate-600 font-medium">
-              {lang === 'mr'
-                ? `पान ${currentPage} / ${totalPages} (एकूण ${filteredForms.length} फॉर्म्स)`
-                : `Page ${currentPage} of ${totalPages} (${filteredForms.length} Total Forms)`}
+            <div className="text-xs text-slate-600 font-medium tabular-nums">
+              {currentPage} / {totalPages} ({filteredForms.length})
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -935,7 +933,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>{lang === 'mr' ? 'मागील' : 'Prev'}</span>
+                <span>{tr(UI.prevPage, lang)}</span>
               </button>
 
               {/* Quick Page Jump Buttons */}
@@ -976,7 +974,7 @@ export const Forms777Catalog: React.FC<Forms777CatalogProps> = ({
                 onClick={() => handlePageChange(currentPage + 1)}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 cursor-pointer"
               >
-                <span>{lang === 'mr' ? 'पुढील' : 'Next'}</span>
+                <span>{tr(UI.nextPage, lang)}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>

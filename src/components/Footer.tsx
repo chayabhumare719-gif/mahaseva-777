@@ -1,6 +1,7 @@
 import React from 'react';
 import { Language } from '../types';
-import { ShieldCheck, ExternalLink, Lock, CheckCircle2, Heart, Info, AlertTriangle } from 'lucide-react';
+import { tr, UI } from '../utils/i18n';
+import { Lock, AlertTriangle, ExternalLink } from 'lucide-react';
 import citizenHelperLogo from '../assets/images/citizen_helper_logo_1791459009342.jpg';
 
 interface FooterProps {
@@ -26,10 +27,10 @@ export const Footer: React.FC<FooterProps> = ({ lang }) => {
               </div>
               <div>
                 <span className="text-base font-bold text-white tracking-tight">
-                  {lang === 'mr' ? 'फॉर्म ७७७ - महासेवा' : 'FORM 777 - MAHASEVA'}
+                  {tr(UI.brandTitle, lang)}
                 </span>
                 <div className="text-[11px] text-amber-400 font-medium">
-                  {lang === 'mr' ? 'स्वतंत्र नागरिक सहाय्यता मंच' : 'Independent Citizen Guide'}
+                  {tr(UI.independentGuide, lang)}
                 </div>
               </div>
             </div>

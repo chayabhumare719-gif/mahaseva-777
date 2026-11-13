@@ -1,6 +1,7 @@
 import React from 'react';
 import { Language } from '../types';
-import { ShieldCheck, Printer, ExternalLink, Search, Info, User } from 'lucide-react';
+import { LANGUAGE_OPTIONS, tr, UI } from '../utils/i18n';
+import { ShieldCheck, Printer, Info, User, Globe } from 'lucide-react';
 import citizenHelperLogo from '../assets/images/citizen_helper_logo_1791459009342.jpg';
 
 interface HeaderProps {
@@ -47,9 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1 text-amber-400 font-bold bg-amber-950/60 px-2 py-0.5 rounded border border-amber-600/40 text-[11px]">
               <Info className="w-3 h-3 text-amber-400 shrink-0" />
-              <span>
-                {lang === 'mr' ? 'स्वतंत्र नागरिक मार्गदर्शक (Non-Govt)' : 'Independent Citizen Guide (Non-Govt)'}
-              </span>
+              <span>{tr(UI.independentGuide, lang)}</span>
             </span>
             <span className="hidden sm:inline text-slate-600">|</span>
             {/* USER REQUEST: "वरी माझे लहान असे नाव टाक / गणेश भुमरे इंग्लिश मध्ये" */}
@@ -64,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer text-[11px]"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>{lang === 'mr' ? '१००% अधिकृत .gov.in लिंक्स' : 'Verified .gov.in'}</span>
+              <span>{tr(UI.verifiedGovLinks, lang)}</span>
             </button>
           </div>
 
@@ -104,28 +103,46 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </div>
 
-            {/* Language Switcher */}
-            <div className="flex items-center bg-slate-800 rounded p-0.5 border border-slate-700 text-xs">
-              <button
-                type="button"
-                onClick={() => setLang('mr')}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
-                  lang === 'mr' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
-                }`}
+            {/* 8-Language Switcher Dropdown */}
+            <div className="flex items-center gap-1.5 bg-slate-800 rounded px-2 py-0.5 border border-slate-700 text-xs">
+              <Globe className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <select
+                aria-label="Select Language"
+                value={lang}
+                onChange={(e) => setLang(e.target.value as Language)}
+                className="bg-slate-800 text-white text-[11px] font-semibold focus:outline-none cursor-pointer pr-1"
               >
-                मराठी
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang('en')}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all ${
-                  lang === 'en' ? 'bg-orange-600 text-white shadow-xs' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                English
-              </button>
+                {LANGUAGE_OPTIONS.map((opt) => (
+                  <option key={opt.code} value={opt.code}>
+                    {opt.nativeName} ({opt.englishName})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Quick 8-Language Bar (Hindi, Bengali, Marathi, Telugu, Tamil, Gujarati, Urdu, English) */}
+      <div className="bg-slate-800/95 border-b border-slate-700 px-4 sm:px-6 py-1">
+        <div className="max-w-7xl mx-auto flex items-center gap-1.5 overflow-x-auto">
+          <span className="text-[10px] text-slate-400 font-semibold whitespace-nowrap mr-1">
+            🌐 Language:
+          </span>
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.code}
+              type="button"
+              onClick={() => setLang(opt.code)}
+              className={`px-2 py-0.5 rounded text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                lang === opt.code
+                  ? 'bg-orange-600 text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+            >
+              {opt.nativeName}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -145,10 +162,10 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900">
-                  {lang === 'mr' ? 'फॉर्म ७७७' : 'FORM 777'}
+                  {tr(UI.brandTitle, lang)}
                 </span>
                 <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.2 rounded border border-orange-300">
-                  {lang === 'mr' ? '७७७ सरकारी फॉर्म्स' : '777 Gov Forms'}
+                  {tr(UI.brandBadge, lang)}
                 </span>
                 {/* USER REQUEST: "वरी माझे लहान असे नाव टाक / गणेश भुमरे इंग्लिश मध्ये" */}
                 <span className="text-[10px] sm:text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200 flex items-center gap-1">
@@ -157,9 +174,7 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs text-slate-600 font-medium leading-tight">
-                {lang === 'mr'
-                  ? 'भारतातील ७७७ मोबाईल-सुलभ अधिकृत फॉर्म्सची संपूर्ण सूची'
-                  : 'Complete Directory of 777 Mobile Government Forms in India'}
+                {tr(UI.brandSubtitle, lang)}
               </p>
             </div>
           </div>
@@ -177,9 +192,9 @@ export const Header: React.FC<HeaderProps> = ({
                 }
               }}
               className="group relative inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs rounded-lg shadow-sm border border-amber-300/60 transition-all cursor-pointer"
-              title="१ ते ७७७ लगातार सर्व फॉर्म्स थेट एका लाईनीत पहा"
+              title={tr(UI.directViewFull, lang)}
             >
-              <span>{lang === 'mr' ? '⚡ थेट पहा' : '⚡ Direct View'}</span>
+              <span>{tr(UI.directViewShort, lang)}</span>
               {/* कोपऱ्यात एक गोल बाजूला छोटेसे ऑप्शन / बॅज */}
               <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-300 font-mono text-[10px] font-black flex items-center justify-center border border-amber-400 shrink-0">
                 777
@@ -193,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Security Shield Audit"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{lang === 'mr' ? 'सुरक्षा हमी' : 'Security'}</span>
+              <span>{tr(UI.securityBtn, lang)}</span>
             </button>
 
             <button
@@ -203,7 +218,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Print checklist"
             >
               <Printer className="w-3.5 h-3.5 text-slate-700" />
-              <span className="hidden sm:inline">{lang === 'mr' ? 'प्रिंट' : 'Print'}</span>
+              <span className="hidden sm:inline">{tr(UI.printBtn, lang)}</span>
             </button>
           </div>
         </div>
@@ -219,7 +234,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <span>{lang === 'mr' ? '१. कागदपत्रे व पात्रता (Checklist & Age)' : '1. Eligibility & Checklist'}</span>
+            <span>{tr(UI.tabChecklist, lang)}</span>
             {selectedDocsCount > 0 && (
               <span className="bg-orange-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                 {selectedDocsCount}
@@ -236,9 +251,9 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            <span>{lang === 'mr' ? '२. ७७७ मोबाईल फॉर्म्स (777 Forms)' : '2. 777 Mobile Forms'}</span>
+            <span>{tr(UI.tabForms777, lang)}</span>
             <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-              {eligibleFormsCount > 0 ? `पात्र: ${eligibleFormsCount}` : '777'}
+              {eligibleFormsCount > 0 ? `${tr(UI.eligibleShort, lang)}: ${eligibleFormsCount}` : '777'}
             </span>
           </button>
 
@@ -251,7 +266,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            {lang === 'mr' ? '३. थेट पात्र योजना (Eligible)' : '3. Eligible Schemes'}
+            {tr(UI.tabSchemes, lang)}
             <span className="ml-1.5 bg-emerald-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
               {eligibleSchemesCount}
             </span>
@@ -266,7 +281,7 @@ export const Header: React.FC<HeaderProps> = ({
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
-            {lang === 'mr' ? '४. शासकीय पोर्टल्स (Directory)' : '4. Official Portals'}
+            {tr(UI.tabPortals, lang)}
           </button>
         </nav>
       </div>

@@ -1,4 +1,5 @@
 import { PortalCategory, PortalDirectoryItem } from '../types';
+import { deeplyFreeze } from '../utils/security';
 
 export const PORTAL_CATEGORIES: { id: PortalCategory; title: { mr: string; en: string } }[] = [
   { id: 'all', title: { mr: 'सर्व पोर्टल (All)', en: 'All' } },
@@ -799,3 +800,5 @@ export const OFFICIAL_PORTALS: PortalDirectoryItem[] = [
     }
   }
 ];
+
+deeplyFreeze(OFFICIAL_PORTALS);

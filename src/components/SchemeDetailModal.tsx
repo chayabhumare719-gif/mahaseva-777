@@ -1,6 +1,8 @@
 import React from 'react';
 import { Language, Scheme } from '../types';
 import { DOCUMENTS } from '../data/documentsData';
+import { getVerifiedGovernmentHref, isVerifiedGovernmentUrl } from '../utils/security';
+import { getDocDisplayName, pickLang, pickLangList, tr, UI } from '../utils/i18n';
 import {
   X,
   ExternalLink,
@@ -41,11 +43,11 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
               {scheme.officialPortalName}
             </span>
             <h3 className="text-lg sm:text-xl font-bold mt-0.5 leading-snug">
-              {scheme.name[lang]}
+              {pickLang(scheme.name, lang)}
             </h3>
             <div className="text-xs text-slate-300 mt-1 flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span>{scheme.department[lang]}</span>
+              <span>{pickLang(scheme.department, lang)}</span>
             </div>
           </div>
           <button
@@ -67,7 +69,7 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
                 {lang === 'mr' ? 'शासकीय थेट लाभ (Benefits)' : 'Government Benefit'}
               </div>
               <div className="text-base font-extrabold text-orange-950 mt-0.5">
-                {scheme.benefit[lang]}
+                {pickLang(scheme.benefit, lang)}
               </div>
             </div>
           </div>
@@ -79,16 +81,16 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
                 {lang === 'mr' ? 'पात्र लाभार्थी गट' : 'Target Group'}
               </div>
               <div className="text-xs font-semibold text-slate-800 mt-1 leading-relaxed">
-                {scheme.targetGroup[lang]}
+                {pickLang(scheme.targetGroup, lang)}
               </div>
             </div>
 
             <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
               <div className="text-[11px] font-bold text-slate-500 uppercase">
-                {lang === 'mr' ? 'शासकीय शुल्क / फी' : 'Official Fees'}
+                {tr(UI.officialFee, lang)}
               </div>
               <div className="text-xs font-semibold text-slate-800 mt-1">
-                {scheme.fees[lang]}
+                {pickLang(scheme.fees, lang)}
               </div>
               {scheme.helpline && (
                 <div className="mt-2 pt-2 border-t border-slate-200 flex items-center gap-1.5 text-xs text-orange-700 font-semibold">
@@ -125,10 +127,10 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
                         <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       )}
                       <div>
-                        <div className="font-bold">{docObj ? docObj.name[lang] : docId}</div>
+                        <div className="font-bold">{docObj ? getDocDisplayName(docObj, lang) : docId}</div>
                         {!isPossessed && docObj && (
                           <div className="text-[11px] text-amber-800 mt-0.5">
-                            <strong>{lang === 'mr' ? 'कुठून मिळवाल:' : 'Source:'}</strong> {docObj.whereToGet[lang]}
+                            <strong>{lang === 'mr' ? 'कुठून मिळवाल:' : 'Source:'}</strong> {pickLang(docObj.whereToGet, lang)}
                           </div>
                         )}
                       </div>
@@ -162,7 +164,7 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
               <span>{lang === 'mr' ? 'कसा अर्ज करावा? (पायरी-पायरीने)' : 'Step-by-Step Application Guide'}</span>
             </h4>
             <ol className="space-y-2 text-xs text-slate-700">
-              {scheme.steps[lang].map((step, idx) => (
+              {pickLangList(scheme.steps, lang).map((step, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
                     {idx + 1}
@@ -181,18 +183,21 @@ export const SchemeDetailModal: React.FC<SchemeDetailModalProps> = ({
             onClick={onClose}
             className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-300 rounded-lg cursor-pointer text-center"
           >
-            {lang === 'mr' ? 'बंद करा' : 'Close'}
+            {tr(UI.closeBtn, lang)}
           </button>
 
           <div className="flex flex-col sm:items-end gap-1 w-full sm:w-auto">
             <a
-              href={scheme.officialUrl}
+              href={getVerifiedGovernmentHref(scheme.officialUrl)}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => {
+                if (!isVerifiedGovernmentUrl(scheme.officialUrl)) e.preventDefault();
+              }}
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
-              title={lang === 'mr' ? 'क्रोम ब्राऊझरच्या नवीन सुरक्षित टॅबमध्ये थेट उघडेल' : 'Opens in Chrome browser tab'}
+              title={tr(UI.openFormInChrome, lang)}
             >
-              <span>{lang === 'mr' ? 'क्रोममध्ये अधिकृत पोर्टलवर थेट अर्ज करा' : 'Apply on Official Portal in Chrome'}</span>
+              <span>{tr(UI.openFormInChrome, lang)}</span>
               <ExternalLink className="w-4 h-4" />
             </a>
             <span className="text-[10px] text-slate-500 text-center sm:text-right">

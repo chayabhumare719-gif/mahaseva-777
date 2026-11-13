@@ -1,8 +1,9 @@
 import React from 'react';
-import { Language, Scheme } from '../types';
+import { Language } from '../types';
 import { DOCUMENTS } from '../data/documentsData';
 import { SCHEMES } from '../data/schemesData';
-import { X, Printer, ShieldCheck, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { getDocDisplayName, getLocaleCode, pickLang, tr, UI } from '../utils/i18n';
+import { X, Printer, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import citizenHelperLogo from '../assets/images/citizen_helper_logo_1791459009342.jpg';
 
 interface PrintableChecklistModalProps {
@@ -32,7 +33,7 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
     window.print();
   };
 
-  const todayDate = new Date().toLocaleDateString(lang === 'mr' ? 'mr-IN' : 'en-IN', {
+  const todayDate = new Date().toLocaleDateString(getLocaleCode(lang), {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -111,7 +112,7 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
                 {possessedDocs.map((doc) => (
                   <div key={doc.id} className="p-2 border border-slate-200 rounded flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span className="font-semibold text-slate-800">{doc.name[lang]}</span>
+                    <span className="font-semibold text-slate-800">{getDocDisplayName(doc, lang)}</span>
                   </div>
                 ))}
               </div>
@@ -121,7 +122,7 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
           {/* Section 2: 100% Eligible Schemes */}
           <div>
             <h2 className="text-sm font-bold text-emerald-900 uppercase border-b border-emerald-300 pb-1 mb-2.5">
-              २. १००% थेट पात्र सरकारी योजना (Eligible Schemes to Apply) — {eligibleSchemes.length} योजना
+              २. १००% थेट पात्र सरकारी योजना (Eligible Schemes to Apply) — {eligibleSchemes.length}
             </h2>
             {eligibleSchemes.length === 0 ? (
               <p className="text-xs text-amber-800 bg-amber-50 p-2 rounded border border-amber-200">
@@ -136,16 +137,16 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="font-bold text-slate-950 text-sm">
-                          {idx + 1}. {s.name[lang]}
+                          {idx + 1}. {pickLang(s.name, lang)}
                         </div>
-                        <div className="text-slate-600 text-[11px]">{s.department[lang]}</div>
+                        <div className="text-slate-600 text-[11px]">{pickLang(s.department, lang)}</div>
                       </div>
                       <span className="text-[11px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
                         {s.officialPortalName}
                       </span>
                     </div>
                     <div className="mt-1 text-emerald-800 font-bold">
-                      थेट लाभ: {s.benefit[lang]}
+                      {tr(UI.benefitPurpose, lang)} {pickLang(s.benefit, lang)}
                     </div>
                   </div>
                 ))}
@@ -162,8 +163,8 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
               <div className="space-y-1.5 text-xs">
                 {missingDocs.slice(0, 8).map((doc) => (
                   <div key={doc.id} className="flex items-start justify-between border-b border-slate-100 pb-1">
-                    <span className="font-semibold text-slate-800">• {doc.name[lang]}</span>
-                    <span className="text-slate-600 italic text-right max-w-xs">{doc.whereToGet[lang]}</span>
+                    <span className="font-semibold text-slate-800">• {getDocDisplayName(doc, lang)}</span>
+                    <span className="text-slate-600 italic text-right max-w-xs">{pickLang(doc.whereToGet, lang)}</span>
                   </div>
                 ))}
               </div>
@@ -186,7 +187,7 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
             onClick={onClose}
             className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50"
           >
-            {lang === 'mr' ? 'रद्द करा' : 'Close'}
+            {tr(UI.closeBtn, lang)}
           </button>
           <button
             type="button"
@@ -194,7 +195,7 @@ export const PrintableChecklistModal: React.FC<PrintableChecklistModalProps> = (
             className="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg flex items-center gap-1.5 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>{lang === 'mr' ? 'प्रिंट / PDF सेव्ह करा' : 'Print / Save as PDF'}</span>
+            <span>{tr(UI.printBtn, lang)} / PDF</span>
           </button>
         </div>
       </div>

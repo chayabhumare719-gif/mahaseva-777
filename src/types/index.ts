@@ -1,4 +1,14 @@
-export type Language = 'mr' | 'en';
+export type Language = 'mr' | 'hi' | 'bn' | 'te' | 'ta' | 'gu' | 'ur' | 'en';
+
+export type LocalizedString = {
+  mr: string;
+  en: string;
+} & Partial<Record<Language, string>>;
+
+export type LocalizedStringList = {
+  mr: string[];
+  en: string[];
+} & Partial<Record<Language, string[]>>;
 
 export type Gender = 'female' | 'male' | 'other' | 'all';
 
@@ -41,19 +51,10 @@ export type DocumentCategory =
 
 export interface DocumentItem {
   id: string;
-  name: {
-    mr: string;
-    en: string;
-  };
+  name: LocalizedString;
   category: DocumentCategory;
-  description: {
-    mr: string;
-    en: string;
-  };
-  whereToGet: {
-    mr: string;
-    en: string;
-  };
+  description: LocalizedString;
+  whereToGet: LocalizedString;
   isCommon?: boolean;
 }
 
@@ -69,27 +70,12 @@ export type SchemeCategory =
 
 export interface Scheme {
   id: string;
-  name: {
-    mr: string;
-    en: string;
-  };
-  department: {
-    mr: string;
-    en: string;
-  };
+  name: LocalizedString;
+  department: LocalizedString;
   category: SchemeCategory;
-  benefit: {
-    mr: string;
-    en: string;
-  };
-  brief: {
-    mr: string;
-    en: string;
-  };
-  targetGroup: {
-    mr: string;
-    en: string;
-  };
+  benefit: LocalizedString;
+  brief: LocalizedString;
+  targetGroup: LocalizedString;
   targetGender?: 'all' | 'female' | 'male';
   minAge?: number;
   maxAge?: number;
@@ -97,15 +83,9 @@ export interface Scheme {
   optionalDocIds?: string[];
   officialUrl: string;
   officialPortalName: string;
-  fees: {
-    mr: string;
-    en: string;
-  };
+  fees: LocalizedString;
   helpline?: string;
-  steps: {
-    mr: string[];
-    en: string[];
-  };
+  steps: LocalizedStringList;
 }
 
 export type PortalCategory = 
@@ -122,58 +102,28 @@ export type PortalCategory =
 
 export interface PortalDirectoryItem {
   id: string;
-  name: {
-    mr: string;
-    en: string;
-  };
+  name: LocalizedString;
   category: PortalCategory;
-  dept: {
-    mr: string;
-    en: string;
-  };
-  description: {
-    mr: string;
-    en: string;
-  };
+  dept: LocalizedString;
+  description: LocalizedString;
   url: string;
   badge?: string;
-  popularServices: {
-    mr: string[];
-    en: string[];
-  };
+  popularServices: LocalizedStringList;
 }
 
 export interface GovFormItem777 {
   formNumber: number; // 1 to 777
   id: string;
-  name: {
-    mr: string;
-    en: string;
-  };
-  department: {
-    mr: string;
-    en: string;
-  };
+  name: LocalizedString;
+  department: LocalizedString;
   categoryKey: string;
-  categoryLabel: {
-    mr: string;
-    en: string;
-  };
+  categoryLabel: LocalizedString;
   isMobileFriendly: boolean;
-  mobileMethod: {
-    mr: string;
-    en: string;
-  };
+  mobileMethod: LocalizedString;
   officialUrl: string;
   portalName: string;
-  fees: {
-    mr: string;
-    en: string;
-  };
-  benefitOrPurpose: {
-    mr: string;
-    en: string;
-  };
+  fees: LocalizedString;
+  benefitOrPurpose: LocalizedString;
   targetGender?: 'all' | 'female' | 'male';
   minAge?: number;
   maxAge?: number;

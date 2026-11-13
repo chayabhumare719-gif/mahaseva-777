@@ -1,7 +1,7 @@
 import React from 'react';
-import { Language, DocumentCategory, Gender, CasteCategory, StudentLevel } from '../types';
+import { Language, Gender, CasteCategory, StudentLevel, LocalizedString } from '../types';
 import { DOCUMENTS, DOCUMENT_CATEGORIES, DOCUMENT_PACKS } from '../data/documentsData';
-import { resolveEffectiveDocuments } from '../utils/eligibility';
+import { pickLang, getDocDisplayName, DOC_CAT_LABELS, tr, UI } from '../utils/i18n';
 import { 
   CheckSquare, 
   Square, 
@@ -119,43 +119,41 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
   // Quick preset ages
   const quickAges = [18, 21, 25, 35, 50, 60, 65, 75];
 
-  // Caste category list with friendly Marathi labels
-  const casteOptions: { key: CasteCategory; label: { mr: string; en: string }; badge: string }[] = [
-    { key: 'open', label: { mr: 'OPEN (खुला प्रवर्ग)', en: 'OPEN / General' }, badge: 'सर्वसामान्य' },
-    { key: 'obc', label: { mr: 'OBC (इतर मागास वर्ग)', en: 'OBC' }, badge: 'नॉन-क्रिमिलेअर' },
-    { key: 'sc', label: { mr: 'SC (अनुसूचित जाती)', en: 'SC' }, badge: 'रमाई / स्वाधार' },
-    { key: 'st', label: { mr: 'ST (अनुसूचित जमाती)', en: 'ST' }, badge: 'शबरी / आदिवासी' },
-    { key: 'vjnt_a', label: { mr: 'VJ/NT-A (विमुक्त जाती)', en: 'VJ / NT-A' }, badge: 'वसंतराव नाईक' },
-    { key: 'nt_b', label: { mr: 'NT-B (भटक्या जमाती - ब)', en: 'NT-B' }, badge: 'आरक्षण' },
-    { key: 'nt_c', label: { mr: 'NT-C (धनगर समाज व इतर)', en: 'NT-C' }, badge: 'पुण्यश्लोक अहिल्यादेवी' },
-    { key: 'nt_d', label: { mr: 'NT-D (वणजारी समाज व इतर)', en: 'NT-D' }, badge: 'आरक्षण' },
-    { key: 'sbc', label: { mr: 'SBC (विशेष मागास प्रवर्ग)', en: 'SBC' }, badge: 'महाज्योती' },
-    { key: 'ews', label: { mr: 'EWS (आर्थिक दुर्बल घटक)', en: 'EWS (10%)' }, badge: 'सारथी / अमृत' },
+  // Caste category list
+  const casteOptions: { key: CasteCategory; label: LocalizedString; badge: string }[] = [
+    { key: 'open', label: { mr: 'OPEN (खुला प्रवर्ग)', en: 'OPEN / General' }, badge: 'OPEN' },
+    { key: 'obc', label: { mr: 'OBC (इतर मागास वर्ग)', en: 'OBC' }, badge: 'NCL' },
+    { key: 'sc', label: { mr: 'SC (अनुसूचित जाती)', en: 'SC' }, badge: 'SC' },
+    { key: 'st', label: { mr: 'ST (अनुसूचित जमाती)', en: 'ST' }, badge: 'ST' },
+    { key: 'vjnt_a', label: { mr: 'VJ/NT-A (विमुक्त जाती)', en: 'VJ / NT-A' }, badge: 'VJ/NT' },
+    { key: 'nt_b', label: { mr: 'NT-B (भटक्या जमाती - ब)', en: 'NT-B' }, badge: 'NT-B' },
+    { key: 'nt_c', label: { mr: 'NT-C (धनगर समाज व इतर)', en: 'NT-C' }, badge: 'NT-C' },
+    { key: 'nt_d', label: { mr: 'NT-D (वणजारी समाज व इतर)', en: 'NT-D' }, badge: 'NT-D' },
+    { key: 'sbc', label: { mr: 'SBC (विशेष मागास प्रवर्ग)', en: 'SBC' }, badge: 'SBC' },
+    { key: 'ews', label: { mr: 'EWS (आर्थिक दुर्बल घटक)', en: 'EWS (10%)' }, badge: 'EWS 10%' },
   ];
 
   return (
     <div className="space-y-6">
-      {/* SECTION 1: SMART PROFILE INPUTS (पायरी १: लिंग, वय, उत्पन्न, जात व शैक्षणिक माहिती) */}
+      {/* SECTION 1: SMART PROFILE INPUTS */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-5 sm:p-6 border-2 border-orange-500/40 shadow-md space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
           <div>
             <div className="inline-flex items-center gap-1.5 bg-orange-500/20 text-orange-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-orange-400/30 mb-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{lang === 'mr' ? 'पायरी १ : स्मार्ट नागरिक माहिती' : 'Step 1 : Smart Citizen Profile'}</span>
+              <span>{tr(UI.step1Badge, lang)}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              {lang === 'mr' ? 'वय, उत्पन्न, जात प्रवर्ग व शैक्षणिक माहिती निवडा' : 'Select Demographics, Income & Caste'}
+              {tr(UI.step1Heading, lang)}
             </h2>
             <p className="text-xs text-slate-300 mt-0.5">
-              {lang === 'mr'
-                ? 'कोणतेही कागदपत्र अपलोड करण्याची गरज नाही — या माहितीवरून तुम्हाला १००% अचूक व पात्र फॉर्म्स सुचवले जातील.'
-                : 'No files uploaded. This profile directly filters eligible government schemes.'}
+              {tr(UI.step1Sub, lang)}
             </p>
           </div>
 
           <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-400/30 px-3 py-1.5 rounded-xl text-emerald-300 text-xs font-semibold shrink-0">
             <Lock className="w-4 h-4 text-emerald-400" />
-            <span>{lang === 'mr' ? '१००% खाजगी व गोपनीय' : '100% Client-Side Private'}</span>
+            <span>{tr(UI.clientPrivateBadge, lang)}</span>
           </div>
         </div>
 
@@ -165,7 +163,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           <div className="space-y-2.5">
             <label className="text-xs font-bold text-slate-200 uppercase tracking-wide flex items-center gap-1.5">
               <User className="w-4 h-4 text-orange-400" />
-              <span>{lang === 'mr' ? '१. तुमचे लिंग (Gender) निवडा:' : '1. Select Gender:'}</span>
+              <span>{tr(UI.selectGenderLabel, lang)}</span>
             </label>
 
             <div className="grid grid-cols-3 gap-2">
@@ -179,8 +177,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 }`}
               >
                 <span className="text-lg">👩</span>
-                <span>{lang === 'mr' ? 'महिला' : 'Female'}</span>
-                <span className="text-[10px] opacity-80">{lang === 'mr' ? '(लाडकी बहीण)' : 'Welfare'}</span>
+                <span>{tr(UI.femaleLabel, lang)}</span>
               </button>
 
               <button
@@ -193,8 +190,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 }`}
               >
                 <span className="text-lg">👨</span>
-                <span>{lang === 'mr' ? 'पुरुष' : 'Male'}</span>
-                <span className="text-[10px] opacity-80">{lang === 'mr' ? '(सर्व योजना)' : 'General'}</span>
+                <span>{tr(UI.maleLabel, lang)}</span>
               </button>
 
               <button
@@ -207,8 +203,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 }`}
               >
                 <span className="text-lg">👥</span>
-                <span>{lang === 'mr' ? 'सर्व' : 'All'}</span>
-                <span className="text-[10px] opacity-80">{lang === 'mr' ? '(सर्वांसाठी)' : 'Universal'}</span>
+                <span>{tr(UI.allGenderLabel, lang)}</span>
               </button>
             </div>
           </div>
@@ -218,11 +213,11 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-200 uppercase tracking-wide flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-emerald-400" />
-                <span>{lang === 'mr' ? '२. तुमचे चालू वय (Age) टाका:' : '2. Enter Current Age:'}</span>
+                <span>{tr(UI.enterAgeLabel, lang)}</span>
               </label>
               {age !== null && (
                 <span className="text-xs font-bold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                  {age} {lang === 'mr' ? 'वर्षे' : 'years'}
+                  {age} {tr(UI.yearsWord, lang)}
                 </span>
               )}
             </div>
@@ -283,7 +278,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <label className="text-xs font-bold text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
               <Coins className="w-4 h-4 text-amber-400" />
-              <span>{lang === 'mr' ? '३. वार्षिक कौटुंबिक उत्पन्न (Annual Income):' : '3. Annual Family Income:'}</span>
+              <span>{tr(UI.annualIncomeLabel, lang)}</span>
             </label>
             {annualIncome !== null && (
               <span className="text-xs font-mono font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-600/40">
@@ -372,7 +367,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <label className="text-xs font-bold text-orange-300 uppercase tracking-wide flex items-center gap-1.5">
               <Award className="w-4 h-4 text-orange-400" />
-              <span>{lang === 'mr' ? '४. तुमचा जात प्रवर्ग (Caste Category):' : '4. Select Caste Category:'}</span>
+              <span>{tr(UI.casteCategoryLabel, lang)}</span>
             </label>
             <span className="text-[11px] text-slate-400">
               {lang === 'mr' ? 'आरक्षित योजना व शिष्यवृत्तीसाठी' : 'For reservation & scholarships'}
@@ -397,7 +392,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                     : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <div className="text-xs font-black">{opt.label[lang]}</div>
+                <div className="text-xs font-black">{pickLang(opt.label, lang)}</div>
                 <div className="text-[10px] opacity-75 mt-0.5">{opt.badge}</div>
               </button>
             ))}
@@ -433,11 +428,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
             <div>
               <label className="text-xs font-bold text-emerald-300 uppercase tracking-wide flex items-center gap-1.5">
                 <GraduationCap className="w-4 h-4 text-emerald-400" />
-                <span>
-                  {lang === 'mr'
-                    ? '५. विद्यार्थी / शिक्षण प्रवर्ग निवडा (Student & Education Level):'
-                    : '5. Select Student / Education Level:'}
-                </span>
+                <span>{tr(UI.studentLevelLabel, lang)}</span>
               </label>
               <p className="text-[11px] text-slate-400 mt-0.5">
                 {lang === 'mr'
@@ -449,26 +440,24 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
             {studentLevel !== 'all' && (
               <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-300 shrink-0 self-start sm:self-auto">
                 {studentLevel === 'below_10th'
-                  ? (lang === 'mr' ? '🎒 १० वी खालील विद्यार्थी' : 'Below 10th Student')
+                  ? `🎒 ${tr(UI.below10thLabel, lang)}`
                   : studentLevel === 'above_10th'
-                  ? (lang === 'mr' ? '🎓 १० वी वरील विद्यार्थी' : 'Above 10th Student')
-                  : (lang === 'mr' ? '👔 सामान्य नागरिक' : 'Non-Student')}
+                  ? `🎓 ${tr(UI.above10thLabel, lang)}`
+                  : `👔 ${tr(UI.notStudentLabel, lang)}`}
               </span>
             )}
           </div>
 
           {/* 4 Responsive Education Category Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {/* Option 1: दहावी खालील विद्यार्थी (Below 10th) */}
+            {/* Option 1: Below 10th */}
             <button
               type="button"
               onClick={() => {
                 setStudentLevel('below_10th');
                 setIsStudent(true);
-                // Clear 10th/12th percentages since they haven't appeared for 10th
                 setSscPercentage(null);
                 setHscPercentage(null);
-                // Suggest bonafide if not having leaving cert
                 if (!hasLeavingCert && !selectedDocIds.includes('bonafide_cert')) {
                   onToggleDoc('bonafide_cert');
                 }
@@ -485,28 +474,27 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                   <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
                     studentLevel === 'below_10th' ? 'bg-white/20 text-white' : 'bg-slate-700 text-emerald-300'
                   }`}>
-                    {lang === 'mr' ? '१ ली ते ९ वी' : '1st-9th'}
+                    1st-9th
                   </span>
                 </div>
                 <div className="text-xs sm:text-sm font-black leading-tight">
-                  {lang === 'mr' ? 'दहावी खालील विद्यार्थी' : 'Below 10th Student'}
+                  {tr(UI.below10thLabel, lang)}
                 </div>
                 <div className="text-[11px] opacity-80 mt-1 leading-snug">
                   {lang === 'mr' ? 'प्राथमिक व माध्यमिक (प्री-मॅट्रिक / शालेय)' : 'Pre-Matric School Student'}
                 </div>
               </div>
               <div className="mt-2 pt-1 border-t border-white/10 text-[10px] font-medium opacity-90">
-                {lang === 'mr' ? '✓ गुणपत्रिकेची गरज नाही' : 'No marksheets needed'}
+                {lang === 'mr' ? '✓ गुणपत्रिकेची गरज नाही' : '✓ No marksheets needed'}
               </div>
             </button>
 
-            {/* Option 2: दहावी वरील विद्यार्थी (Above 10th) */}
+            {/* Option 2: Above 10th */}
             <button
               type="button"
               onClick={() => {
                 setStudentLevel('above_10th');
                 setIsStudent(true);
-                // Auto-tick 10th marksheet if not ticked
                 if (!selectedDocIds.includes('ssc_marksheet') && !selectedDocIds.includes('marksheet')) {
                   onToggleDoc('ssc_marksheet');
                 }
@@ -523,22 +511,22 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                   <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
                     studentLevel === 'above_10th' ? 'bg-white/20 text-white' : 'bg-slate-700 text-emerald-300'
                   }`}>
-                    {lang === 'mr' ? '१० वी+' : '10th+'}
+                    10th+
                   </span>
                 </div>
                 <div className="text-xs sm:text-sm font-black leading-tight">
-                  {lang === 'mr' ? 'दहावी वरील विद्यार्थी' : 'Above 10th Student'}
+                  {tr(UI.above10thLabel, lang)}
                 </div>
                 <div className="text-[11px] opacity-80 mt-1 leading-snug">
                   {lang === 'mr' ? '१० वी, ११ वी, १२ वी, पदवी, डिप्लोमा / कॉलेज' : 'Post-Matric, Higher Edu & College'}
                 </div>
               </div>
               <div className="mt-2 pt-1 border-t border-white/10 text-[10px] font-medium opacity-90">
-                {lang === 'mr' ? '✓ महाडीबीटी व EBC पात्र' : 'MahaDBT & EBC ready'}
+                {lang === 'mr' ? '✓ महाडीबीटी व EBC पात्र' : '✓ MahaDBT & EBC ready'}
               </div>
             </button>
 
-            {/* Option 3: विद्यार्थी नाही (Not a Student) */}
+            {/* Option 3: Not a Student */}
             <button
               type="button"
               onClick={() => {
@@ -557,11 +545,11 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 <div className="flex items-center justify-between gap-1 mb-1">
                   <span className="text-lg">👔</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">
-                    {lang === 'mr' ? 'नागरिक' : 'Citizen'}
+                    Citizen
                   </span>
                 </div>
                 <div className="text-xs sm:text-sm font-black leading-tight">
-                  {lang === 'mr' ? 'विद्यार्थी नाही' : 'Not a Student'}
+                  {tr(UI.notStudentLabel, lang)}
                 </div>
                 <div className="text-[11px] opacity-80 mt-1 leading-snug">
                   {lang === 'mr' ? 'शिक्षण पूर्ण / नोकरी / शेतकरी / व्यावसायिक' : 'Working / Farmer / General Citizen'}
@@ -572,7 +560,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               </div>
             </button>
 
-            {/* Option 4: सर्व (All / Reset filter) */}
+            {/* Option 4: All Categories */}
             <button
               type="button"
               onClick={() => {
@@ -589,18 +577,18 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 <div className="flex items-center justify-between gap-1 mb-1">
                   <span className="text-lg">👥</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-orange-300">
-                    {lang === 'mr' ? 'सर्व' : 'All'}
+                    {tr(UI.allGenderLabel, lang)}
                   </span>
                 </div>
                 <div className="text-xs sm:text-sm font-black leading-tight">
-                  {lang === 'mr' ? 'सर्व प्रवर्ग दाखवा' : 'All Categories'}
+                  {tr(UI.allCategoriesLabel, lang)}
                 </div>
                 <div className="text-[11px] opacity-80 mt-1 leading-snug">
                   {lang === 'mr' ? 'शालेय, महाविद्यालयीन व सर्वसामान्य' : 'Browse all schemes without education filter'}
                 </div>
               </div>
               <div className="mt-2 pt-1 border-t border-white/10 text-[10px] font-medium opacity-90">
-                {lang === 'mr' ? '७७७ फॉर्म्स उपलब्ध' : '777 forms available'}
+                {tr(UI.brandBadge, lang)}
               </div>
             </button>
           </div>
@@ -803,10 +791,10 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           <div>
             <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 text-xs font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 mb-1.5">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{lang === 'mr' ? 'पायरी २ : कागदपत्रांवर टिक करा' : 'Step 2 : Tick Documents'}</span>
+              <span>{tr(UI.step2Badge, lang)}</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              {lang === 'mr' ? 'तुमच्याकडील कागदपत्रांवर टिक (☑️) करा' : 'Tick Documents You Have'}
+              {tr(UI.step2Heading, lang)}
             </h2>
             <div className="mt-1 flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200 max-w-2xl">
               <Info className="w-4 h-4 shrink-0 text-emerald-600" />
@@ -823,7 +811,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center gap-4 shrink-0">
             <div>
               <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                {lang === 'mr' ? 'निवडलेली कागदपत्रे' : 'Selected Docs'}
+                {tr(UI.selectedDocsLabel, lang)}
               </div>
               <div className="text-2xl font-extrabold text-slate-900 tabular-nums">
                 {selectedCount} <span className="text-xs font-normal text-slate-500">/ {totalDocs}</span>
@@ -832,7 +820,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
             <div className="h-10 w-px bg-slate-200" />
             <div className="text-right">
               <div className="text-xs font-semibold text-slate-500">
-                {lang === 'mr' ? 'पात्रता प्रमाण' : 'Coverage'}
+                {tr(UI.coverageLabel, lang)}
               </div>
               <div className="text-xl font-bold text-orange-600 tabular-nums">
                 {percentage}%
@@ -841,7 +829,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           </div>
         </div>
 
-        {/* User Request: स्मार्ट लॉजिक - शाळा सोडल्याचा दाखला (LC) असल्यास बोनाफाईडची गरज नाही */}
+        {/* Smart logic note */}
         {hasLeavingCert && (
           <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3.5 text-xs text-emerald-950 flex items-start gap-2.5 shadow-2xs">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -856,12 +844,12 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
           </div>
         )}
 
-        {/* User Request: कागदपत्रे गोळा करण्यास मदत - 1-Click Document Packs */}
+        {/* 1-Click Document Packs */}
         <div className="space-y-2 pt-1">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-              <span>{lang === 'mr' ? 'कागदपत्रे गोळा करण्यास झटपट मदत (1-Click Packs):' : 'Quick Document Packs:'}</span>
+              <span>{tr(UI.quickPacksTitle, lang)}</span>
             </span>
           </div>
 
@@ -875,15 +863,15 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               >
                 <div>
                   <div className="text-xs font-black text-slate-900 group-hover:text-orange-950">
-                    {pack.title[lang]}
+                    {pickLang(pack.title, lang)}
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1 line-clamp-2 leading-tight">
-                    {pack.description[lang]}
+                    {pickLang(pack.description, lang)}
                   </p>
                 </div>
                 <div className="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-bold text-orange-600">
-                  <span>{pack.docIds.length} {lang === 'mr' ? 'कागदपत्रे' : 'docs'}</span>
-                  <span>+ जोडा ↗</span>
+                  <span>{pack.docIds.length}</span>
+                  <span>+ ↗</span>
                 </div>
               </button>
             ))}
@@ -899,7 +887,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-800 bg-white hover:bg-orange-50 hover:text-orange-900 hover:border-orange-300 border border-slate-300 rounded-md shadow-2xs transition-all cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-orange-600" />
-              <span>{lang === 'mr' ? '⭐ सामान्य ५ कागदपत्रे निवडा' : 'Select Common 5'}</span>
+              <span>{tr(UI.selectCommon5, lang)}</span>
             </button>
 
             <button
@@ -908,7 +896,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-md shadow-2xs transition-all cursor-pointer"
             >
               <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{lang === 'mr' ? 'सर्व निवडा' : 'Select All'}</span>
+              <span>{tr(UI.selectAllBtn, lang)}</span>
             </button>
 
             <button
@@ -917,14 +905,12 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-700 bg-white hover:bg-red-50 border border-red-200 rounded-md shadow-2xs transition-all cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5 text-red-500" />
-              <span>{lang === 'mr' ? 'सर्व काढा' : 'Clear All'}</span>
+              <span>{tr(UI.clearAllBtn, lang)}</span>
             </button>
           </div>
 
-          <div className="text-xs text-slate-500 font-medium">
-            {lang === 'mr'
-              ? `${selectedCount} कागदपत्रे निवडली आहेत`
-              : `${selectedCount} documents selected`}
+          <div className="text-xs text-slate-500 font-medium tabular-nums">
+            {selectedCount} / {totalDocs} {tr(UI.tickedWord, lang)}
           </div>
         </div>
 
@@ -940,11 +926,11 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 <div className="bg-slate-100/80 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-800 text-xs sm:text-sm">
-                      {cat.title[lang]}
+                      {DOC_CAT_LABELS[cat.id]?.[lang] ?? pickLang(cat.title, lang)}
                     </span>
                   </div>
-                  <span className="text-xs font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                    {catSelectedCount} / {catDocs.length} {lang === 'mr' ? 'निवडली' : 'ticked'}
+                  <span className="text-xs font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200 tabular-nums">
+                    {catSelectedCount} / {catDocs.length} {tr(UI.tickedWord, lang)}
                   </span>
                 </div>
 
@@ -952,7 +938,6 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 <div className="p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 bg-white">
                   {catDocs.map((doc) => {
                     const isChecked = selectedDocIds.includes(doc.id);
-                    // Check if doc is bonafide and satisfied by LC
                     const isBonafideSatisfiedByLc =
                       (doc.id === 'bonafide_cert' || doc.id === 'student_id') && hasLeavingCert;
 
@@ -979,27 +964,27 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className={`text-xs font-bold leading-tight ${isChecked ? 'text-emerald-950 font-black' : 'text-slate-800'}`}>
-                              {doc.name[lang]}
+                              {getDocDisplayName(doc, lang)}
                             </span>
                             {doc.isCommon && (
                               <span className="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.2 rounded">
-                                {lang === 'mr' ? 'सामान्य' : 'Common'}
+                                {tr(UI.commonBadge, lang)}
                               </span>
                             )}
                             {isBonafideSatisfiedByLc && !isChecked && (
                               <span className="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.2 rounded border border-emerald-300">
-                                {lang === 'mr' ? '✓ LC मुळे ग्राह्य' : '✓ Covered by LC'}
+                                ✓ LC
                               </span>
                             )}
                           </div>
 
                           <p className="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                            {doc.description[lang]}
+                            {pickLang(doc.description, lang)}
                           </p>
 
                           <div className="mt-2 text-[10px] text-slate-600 flex items-center gap-1">
                             <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                            <span className="truncate">{doc.whereToGet[lang]}</span>
+                            <span className="truncate">{pickLang(doc.whereToGet, lang)}</span>
                           </div>
                         </div>
                       </div>
@@ -1012,30 +997,27 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
         </div>
       </div>
 
-      {/* SECTION 3: AUTOMATIC ELIGIBILITY RESULTS (पायरी ३: स्वयंचलित थेट पात्रता निकाल) */}
+      {/* SECTION 3: AUTOMATIC ELIGIBILITY RESULTS */}
       <div className="bg-gradient-to-r from-emerald-900 via-slate-900 to-slate-900 text-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-400/50 shadow-lg space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full border border-emerald-400/40">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>{lang === 'mr' ? 'पायरी ३ : स्वयंचलित थेट पात्रता निकाल' : 'Step 3 : Live Automatic Eligibility Result'}</span>
+              <span>{tr(UI.step3Badge, lang)}</span>
             </div>
             <h3 className="text-xl sm:text-2xl font-black text-white">
-              {lang === 'mr' ? 'तुमच्या माहिती व कागदपत्रांनुसार पात्रता निकाल:' : 'Eligibility Result Based on Your Data:'}
+              {tr(UI.step3Heading, lang)}
             </h3>
             <p className="text-xs text-slate-300 flex flex-wrap items-center gap-2">
-              <span>लिंग: {gender === 'female' ? 'महिला' : gender === 'male' ? 'पुरुष' : 'सर्व'}</span>
-              <span>• वय: {age ? `${age} वर्षे` : 'सर्व'}</span>
+              <span>{gender === 'female' ? tr(UI.femaleLabel, lang) : gender === 'male' ? tr(UI.maleLabel, lang) : tr(UI.allGenderLabel, lang)}</span>
+              {age && <span>• {age} {tr(UI.yearsWord, lang)}</span>}
               {annualIncome !== null && (
-                <span>• उत्पन्न: ₹{annualIncome.toLocaleString('en-IN')}</span>
+                <span>• ₹{annualIncome.toLocaleString('en-IN')}</span>
               )}
               {casteCategory !== 'all' && (
-                <span>• प्रवर्ग: {casteCategory.toUpperCase()}</span>
+                <span>• {casteCategory.toUpperCase()}</span>
               )}
-              {isStudent && (
-                <span>• विद्यार्थी (१० वी: {sscPercentage ? `${sscPercentage}%` : 'होय'})</span>
-              )}
-              <span>• कागदपत्रे: {selectedCount}</span>
+              <span>• {selectedCount} {tr(UI.tickedWord, lang)}</span>
             </p>
           </div>
 
@@ -1047,7 +1029,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
             >
               <Smartphone className="w-4 h-4" />
               <span>
-                {lang === 'mr' ? `✅ १००% पात्र फॉर्म्स पहा (${eligibleFormsCount})` : `View Eligible Forms (${eligibleFormsCount})`}
+                {tr(UI.viewEligibleFormsBtn, lang)} ({eligibleFormsCount})
               </span>
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -1058,7 +1040,7 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
               className="px-5 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
             >
               <span>
-                {lang === 'mr' ? `पात्र योजना पहा (${eligibleSchemesCount})` : `Eligible Schemes (${eligibleSchemesCount})`}
+                {tr(UI.viewEligibleSchemesBtn, lang)} ({eligibleSchemesCount})
               </span>
               <ArrowRight className="w-4 h-4" />
             </button>

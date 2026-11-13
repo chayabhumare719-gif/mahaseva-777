@@ -1,6 +1,7 @@
 import React from 'react';
 import { Language, GovFormItem777 } from '../types';
-import { isVerifiedGovernmentUrl } from '../utils/security';
+import { isVerifiedGovernmentUrl, safeOpenGovernmentUrl } from '../utils/security';
+import { getLocalizedFormName, pickLang, tr, UI } from '../utils/i18n';
 import {
   X,
   ExternalLink,
@@ -34,9 +35,11 @@ export const FormLauncherModal: React.FC<FormLauncherModalProps> = ({
   const isVerifiedGov = isVerifiedGovernmentUrl(form.officialUrl);
 
   const handleLaunchInChrome = () => {
-    // Safely open in system browser (Chrome on Android / iOS Safari / Desktop Chrome)
-    window.open(form.officialUrl, '_blank', 'noopener,noreferrer');
-    onClose();
+    if (!isVerifiedGov) return;
+    // Safely open verified HTTPS .gov.in URL with opener nullification
+    if (safeOpenGovernmentUrl(form.officialUrl)) {
+      onClose();
+    }
   };
 
   return (
@@ -51,13 +54,13 @@ export const FormLauncherModal: React.FC<FormLauncherModalProps> = ({
               </span>
               <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold px-2 py-0.5 rounded border border-emerald-400/30">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                {lang === 'mr' ? 'पडताळणी झालेले अधिकृत .gov.in' : 'Verified .gov.in Domain'}
+                {tr(UI.verifiedGovBadge, lang)}
               </span>
             </div>
             <h3 className="text-lg sm:text-xl font-bold leading-snug text-white">
-              {form.name[lang]}
+              {getLocalizedFormName(form.name, lang)}
             </h3>
-            <p className="text-xs text-slate-300">{form.department[lang]}</p>
+            <p className="text-xs text-slate-300">{pickLang(form.department, lang)}</p>
           </div>
 
           <button
@@ -126,10 +129,10 @@ export const FormLauncherModal: React.FC<FormLauncherModalProps> = ({
           <div className="space-y-1.5 text-xs sm:text-sm">
             <span className="font-bold text-slate-900 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-orange-600" />
-              {lang === 'mr' ? 'योजनेचा उद्देश व लाभ:' : 'Scheme Benefit & Purpose:'}
+              {tr(UI.benefitPurpose, lang)}
             </span>
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-700 leading-relaxed">
-              {form.benefitOrPurpose[lang]}
+              {pickLang(form.benefitOrPurpose, lang)}
             </div>
           </div>
 
@@ -137,18 +140,18 @@ export const FormLauncherModal: React.FC<FormLauncherModalProps> = ({
           <div className="space-y-1.5 text-xs sm:text-sm">
             <span className="font-bold text-slate-900 flex items-center gap-1.5">
               <Smartphone className="w-4 h-4 text-emerald-600" />
-              {lang === 'mr' ? 'मोबाईलवरून अर्ज कसा करावा?' : 'How to apply on Mobile:'}
+              {tr(UI.mobileMethod, lang)}
             </span>
             <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-slate-700 leading-relaxed">
-              {form.mobileMethod[lang]}
+              {pickLang(form.mobileMethod, lang)}
             </div>
           </div>
 
           {/* Fee & Department Details */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-              <span className="text-slate-500">{lang === 'mr' ? 'अधिकृत सरकारी शुल्क:' : 'Official Fee:'}</span>
-              <div className="font-bold text-slate-900 text-sm mt-0.5">{form.fees[lang]}</div>
+              <span className="text-slate-500">{tr(UI.officialFee, lang)}</span>
+              <div className="font-bold text-slate-900 text-sm mt-0.5">{pickLang(form.fees, lang)}</div>
             </div>
             <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
               <span className="text-slate-500">{lang === 'mr' ? 'अधिकृत पोर्टल:' : 'Official Portal:'}</span>
@@ -182,16 +185,25 @@ export const FormLauncherModal: React.FC<FormLauncherModalProps> = ({
               onClick={onClose}
               className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors cursor-pointer"
             >
-              {lang === 'mr' ? 'बंद करा' : 'Cancel'}
+              {tr(UI.closeBtn, lang)}
             </button>
 
             <button
               type="button"
               onClick={handleLaunchInChrome}
-              className="flex-1 sm:flex-none px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer"
+              disabled={!isVerifiedGov}
+              className={`flex-1 sm:flex-none px-5 py-2.5 text-xs sm:text-sm font-bold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2 ${
+                isVerifiedGov
+                  ? 'text-white bg-orange-600 hover:bg-orange-700 cursor-pointer'
+                  : 'text-slate-400 bg-slate-200 cursor-not-allowed'
+              }`}
             >
               <Smartphone className="w-4 h-4 text-emerald-300" />
-              <span>{lang === 'mr' ? 'क्रोममध्ये थेट फॉर्म भरा' : 'Open Form in Chrome'}</span>
+              <span>
+                {isVerifiedGov
+                  ? tr(UI.openFormInChrome, lang)
+                  : (lang === 'mr' ? 'असुरक्षित लिंक अवरोधित' : 'Untrusted Link Blocked')}
+              </span>
               <ExternalLink className="w-4 h-4" />
             </button>
           </div>

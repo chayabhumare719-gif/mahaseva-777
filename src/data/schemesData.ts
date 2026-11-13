@@ -1,4 +1,5 @@
 import { Scheme, SchemeCategory } from '../types';
+import { deeplyFreeze } from '../utils/security';
 
 export const SCHEME_CATEGORIES: { id: SchemeCategory | 'all'; title: { mr: string; en: string } }[] = [
   { id: 'all', title: { mr: 'सर्व योजना (All Schemes)', en: 'All Schemes' } },
@@ -924,3 +925,5 @@ export const SCHEMES: Scheme[] = [
     }
   }
 ];
+
+deeplyFreeze(SCHEMES);

@@ -1,4 +1,4 @@
-import { GovFormItem777, Scheme, CitizenProfile } from '../types';
+import { GovFormItem777, Scheme, CitizenProfile, LocalizedString } from '../types';
 
 export interface EligibilityEvaluation {
   isEligible: boolean;
@@ -7,10 +7,7 @@ export interface EligibilityEvaluation {
   missingDocIds: string[];
   possessedDocIds: string[];
   smartSubstitutedDocIds?: string[];
-  reason?: {
-    mr: string;
-    en: string;
-  };
+  reason?: LocalizedString;
 }
 
 /**
@@ -146,9 +143,24 @@ export function evaluateFormEligibility(
       missingDocIds,
       possessedDocIds,
       smartSubstitutedDocIds,
-      reason: {
-        mr: formTargetGender === 'female' ? 'केवळ महिलांसाठी पात्र (लिंग जुळत नाही)' : 'केवळ पुरुषांसाठी पात्र (लिंग जुळत नाही)',
-        en: formTargetGender === 'female' ? 'For Female applicants only' : 'For Male applicants only',
+      reason: formTargetGender === 'female' ? {
+        mr: 'केवळ महिलांसाठी पात्र (लिंग जुळत नाही)',
+        hi: 'केवल महिलाओं के लिए पात्र',
+        bn: 'শুধুমাত্র মহিলাদের জন্য যোগ্য',
+        te: 'మహిళలకు మాత్రమే అర్హత',
+        ta: 'பெண்களுக்கு மட்டுமே தகுதியானது',
+        gu: 'ફક્ત મહિલાઓ માટે પાત્ર',
+        ur: 'صرف خواتین کے لیے اہل',
+        en: 'For Female applicants only',
+      } : {
+        mr: 'केवळ पुरुषांसाठी पात्र (लिंग जुळत नाही)',
+        hi: 'केवल पुरुषों के लिए पात्र',
+        bn: 'শুধুমাত্র পুরুষদের জন্য যোগ্য',
+        te: 'పురుషులకు మాత్రమే అర్హత',
+        ta: 'ஆண்களுக்கு மட்டுமே தகுதியானது',
+        gu: 'ફક્ત પુરુષો માટે પાત્ર',
+        ur: 'صرف مردوں کے لیے اہل',
+        en: 'For Male applicants only',
       },
     };
   }
@@ -349,6 +361,7 @@ export function evaluateFormEligibility(
   }
 
   if (missingDocIds.length <= 2) {
+    const n = missingDocIds.length;
     return {
       isEligible: false,
       isAlmostEligible: true,
@@ -357,12 +370,19 @@ export function evaluateFormEligibility(
       possessedDocIds,
       smartSubstitutedDocIds,
       reason: {
-        mr: `फक्त ${missingDocIds.length} कागदपत्र कमी आहे`,
-        en: `Only ${missingDocIds.length} document(s) missing`,
+        mr: `फक्त ${n} कागदपत्र कमी आहे`,
+        hi: `केवल ${n} दस्तावेज़ कम हैं`,
+        bn: `মাত্র ${n}টি নথি বাকি`,
+        te: `కేవలం ${n} పత్రాలు తక్కువ`,
+        ta: `${n} ஆவணம் மட்டும் குறைவு`,
+        gu: `ફક્ત ${n} દસ્તાવેજ ખૂટે છે`,
+        ur: `صرف ${n} دستاویز کم ہیں`,
+        en: `Only ${n} document(s) missing`,
       },
     };
   }
 
+  const m = missingDocIds.length;
   return {
     isEligible: false,
     isAlmostEligible: false,
@@ -371,8 +391,14 @@ export function evaluateFormEligibility(
     possessedDocIds,
     smartSubstitutedDocIds,
     reason: {
-      mr: `${missingDocIds.length} कागदपत्रे आवश्यक आहेत`,
-      en: `${missingDocIds.length} documents missing`,
+      mr: `${m} कागदपत्रे आवश्यक आहेत`,
+      hi: `${m} दस्तावेज़ आवश्यक हैं`,
+      bn: `${m}টি নথি প্রয়োজন`,
+      te: `${m} పత్రాలు అవసరం`,
+      ta: `${m} ஆவணங்கள் தேவை`,
+      gu: `${m} દસ્તાવેજો જરૂરી છે`,
+      ur: `${m} دستاویزات درکار ہیں`,
+      en: `${m} documents missing`,
     },
   };
 }
@@ -560,6 +586,7 @@ export function evaluateSchemeEligibility(
   }
 
   if (missingDocIds.length <= 2) {
+    const n = missingDocIds.length;
     return {
       isEligible: false,
       isAlmostEligible: true,
@@ -568,12 +595,19 @@ export function evaluateSchemeEligibility(
       possessedDocIds,
       smartSubstitutedDocIds,
       reason: {
-        mr: `फक्त ${missingDocIds.length} कागदपत्र बाकी`,
-        en: `Only ${missingDocIds.length} doc missing`,
+        mr: `फक्त ${n} कागदपत्र बाकी`,
+        hi: `केवल ${n} दस्तावेज़ शेष`,
+        bn: `মাত্র ${n}টি নথি বাকি`,
+        te: `కేవలం ${n} పత్రాలు బాకీ`,
+        ta: `${n} ஆவணம் மட்டும் பாக்கி`,
+        gu: `ફક્ત ${n} દસ્તાવેજ બાકી`,
+        ur: `صرف ${n} دستاویز باقی`,
+        en: `Only ${n} doc missing`,
       },
     };
   }
 
+  const m = missingDocIds.length;
   return {
     isEligible: false,
     isAlmostEligible: false,
@@ -582,8 +616,14 @@ export function evaluateSchemeEligibility(
     possessedDocIds,
     smartSubstitutedDocIds,
     reason: {
-      mr: `${missingDocIds.length} कागदपत्रे अपुरी`,
-      en: `${missingDocIds.length} docs missing`,
+      mr: `${m} कागदपत्रे अपुरी`,
+      hi: `${m} दस्तावेज़ अधूरे`,
+      bn: `${m}টি নথি অসম্পূর্ণ`,
+      te: `${m} పత్రాలు అసంపూర్తి`,
+      ta: `${m} ஆவணங்கள் குறைவு`,
+      gu: `${m} દસ્તાવેજો અધૂરા`,
+      ur: `${m} دستاویزات نامکمل`,
+      en: `${m} docs missing`,
     },
   };
 }

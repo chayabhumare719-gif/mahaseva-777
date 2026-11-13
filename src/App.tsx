@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Language, Scheme, Gender, CasteCategory, CitizenProfile, StudentLevel, GovFormItem777 } from './types';
 import { DOCUMENTS } from './data/documentsData';
 import { SCHEMES } from './data/schemesData';
 import { FORMS_777_DATA } from './data/forms777Data';
 import { evaluateFormEligibility, evaluateSchemeEligibility } from './utils/eligibility';
+import { LANGUAGE_OPTIONS, tr, UI } from './utils/i18n';
 import { Header } from './components/Header';
 import { EmergencyBanner } from './components/EmergencyBanner';
 import { Forms777Catalog } from './components/Forms777Catalog';
@@ -135,6 +136,12 @@ export default function App() {
     setSelectedDocIds((prev) => Array.from(new Set([...prev, ...docIds])));
   };
 
+  useEffect(() => {
+    const opt = LANGUAGE_OPTIONS.find((l) => l.code === lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = opt?.dir || 'ltr';
+  }, [lang]);
+
   // Font size classes
   const fontSizeClass =
     fontSize === 'larger'
@@ -144,7 +151,10 @@ export default function App() {
       : 'text-sm';
 
   return (
-    <div className={`min-h-screen bg-slate-50 flex flex-col ${fontSizeClass}`}>
+    <div
+      dir={lang === 'ur' ? 'rtl' : 'ltr'}
+      className={`min-h-screen bg-slate-50 flex flex-col ${fontSizeClass}`}
+    >
       {/* Official Header */}
       <Header
         lang={lang}
@@ -170,18 +180,14 @@ export default function App() {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs bg-orange-600 text-white font-extrabold px-2.5 py-0.5 rounded-full font-mono">
-                ७७७ फॉर्म्स
+                {tr(UI.brandBadge, lang)}
               </span>
               <h1 className="text-base sm:text-lg font-black text-white tracking-tight">
-                {lang === 'mr'
-                  ? 'भारतातील ७७७ मोबाईल-सुलभ अधिकृत फॉर्म्स (Form #001 ते #777)'
-                  : '777 Verified Mobile Government Forms in India (Form #001 to #777)'}
+                {tr(UI.heroHeading, lang)}
               </h1>
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
-              {lang === 'mr'
-                ? 'फॉर्म १ पासून ७७७ पर्यंत सलग एका खाली एक उपलब्ध आहेत. कोणतीही माहिती न भरता थेट पहा.'
-                : 'Forms 1 to 777 listed continuously row-by-row. Browse freely without entering personal info.'}
+              {tr(UI.heroSubheading, lang)}
             </p>
           </div>
 
@@ -192,10 +198,10 @@ export default function App() {
               type="button"
               onClick={handleDirectViewAll}
               className="px-3.5 py-2 text-xs font-black rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md border border-amber-300/40"
-              title="१ ते ७७७ लगातार सर्व फॉर्म्स थेट एका लाईनीत पहा"
+              title={tr(UI.directViewFull, lang)}
             >
               <Sparkles className="w-4 h-4 text-amber-200" />
-              <span>{lang === 'mr' ? '⚡ थेट पहा (१ ते ७७७ लगातार)' : '⚡ Direct View (1-777)'}</span>
+              <span>{tr(UI.directViewFull, lang)}</span>
               <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-300 font-mono text-[10px] font-black flex items-center justify-center border border-amber-400">
                 777
               </span>
@@ -211,7 +217,7 @@ export default function App() {
               }`}
             >
               <CheckSquare className="w-4 h-4 text-emerald-400" />
-              <span>{lang === 'mr' ? 'कागदपत्रे व वय निवडा' : 'Check Eligibility'}</span>
+              <span>{tr(UI.checkEligibilityBtn, lang)}</span>
               {selectedDocIds.length > 0 && (
                 <span className="bg-emerald-500 text-slate-950 text-[10px] px-1.5 py-0.2 rounded-full font-black">
                   {selectedDocIds.length}
@@ -329,10 +335,10 @@ export default function App() {
           <div className="flex flex-col text-left">
             <span className="text-xs font-black leading-tight tracking-tight flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-              <span>{lang === 'mr' ? 'थेट पहा' : 'Direct View'}</span>
+              <span>{tr(UI.directViewShort, lang)}</span>
             </span>
             <span className="text-[10px] text-amber-100 font-bold leading-none">
-              {lang === 'mr' ? '१ ते ७७७ लगातार' : '1 to 777 in line'}
+              {tr(UI.floatingDirectDesc, lang)}
             </span>
           </div>
           {/* कोपऱ्यात गोल बॅज */}
